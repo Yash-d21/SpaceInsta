@@ -24,10 +24,20 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # Ensure temp and img directories exist
-TEMP_DIR = "temp"
+# Ensure temp and img directories exist
+if os.environ.get('VERCEL') or os.path.exists('/tmp'):
+    TEMP_DIR = "/tmp"
+else:
+    TEMP_DIR = "temp"
+    os.makedirs(TEMP_DIR, exist_ok=True)
+
+# For IMG_OUTPUT_DIR, in Vercel we can't write to static, so we will use /tmp for temp generation
+# and return base64. But local run needs standard dir.
 IMG_OUTPUT_DIR = os.path.join("static", "img")
-os.makedirs(TEMP_DIR, exist_ok=True)
-os.makedirs(IMG_OUTPUT_DIR, exist_ok=True)
+if not os.environ.get('VERCEL'):
+    os.makedirs(IMG_OUTPUT_DIR, exist_ok=True)
+
+import base64
 
 def generate_image_via_gemini(prompt, index):
     """
@@ -47,6 +57,13 @@ def generate_image_via_gemini(prompt, index):
             for part in candidate.content.parts:
                 if part.inline_data:
                     image_bytes = part.inline_data.data
+                    
+                    # If on Vercel, return base64 data URI directly to avoid disk write issues
+                    if os.environ.get('VERCEL'):
+                        b64_string = base64.b64encode(image_bytes).decode('utf-8')
+                        return f"data:image/png;base64,{b64_string}"
+                    
+                    # Local env: Save to disk
                     filename = f"banana_{int(time.time())}_{index}.png"
                     filepath = os.path.join(IMG_OUTPUT_DIR, filename)
                     with open(filepath, "wb") as f:

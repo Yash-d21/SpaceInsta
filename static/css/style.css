@@ -540,4 +540,83 @@ input[type="file"] {
          a l i g n - i t e m s :   c e n t e r ;  
          j u s t i f y - c o n t e n t :   c e n t e r ;  
  }  
- 
+ /* Dock Navigation */
+.dock-outer {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.dock-panel {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 12px;
+    border-radius: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dock-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dock-item:hover {
+    transform: scale(1.5) translateY(-10px);
+    margin: 0 10px;
+    z-index: 10;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Simulate the ripple effect on neighbors using sibling selectors (basic approx) */
+.dock-item:hover+.dock-item {
+    transform: scale(1.2) translateY(-5px);
+    margin-left: 5px;
+}
+
+.dock-item:has(+ .dock-item:hover) {
+    transform: scale(1.2) translateY(-5px);
+    margin-right: 5px;
+}
+
+.dock-label {
+    position: absolute;
+    top: -40px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+}
+
+.dock-item:hover .dock-label {
+    opacity: 1;
+}
+
+.dock-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

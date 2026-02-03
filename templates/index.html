@@ -34,6 +34,12 @@
         </div>
     </div>
 
+    <!-- Dock Navigation Container (Global) -->
+    <div id="dockContainer"
+        style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999;">
+        <!-- Dock will be rendered here by JS -->
+    </div>
+
     <div class="loader-overlay" id="loader">
         <div class="spinner"></div>
         <p>Scanning Room with AI...</p>
@@ -41,11 +47,6 @@
 
     <header>
         <div class="logo">InstaSpace AI</div>
-        <!-- Dock Navigation Container -->
-        <div id="dockContainer"
-            style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;">
-            <!-- Dock will be rendered here by JS -->
-        </div>
 
         <!-- User Badge (Top Right) -->
         <div id="userBadgeHeader" style="display: none; align-items: center; gap: 10px;">
