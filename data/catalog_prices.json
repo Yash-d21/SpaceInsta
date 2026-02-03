@@ -1,0 +1,72 @@
+{
+    "sofa_3_seater": {
+        "economy": 18000,
+        "standard": 35000,
+        "premium": 80000
+    },
+    "coffee_table": {
+        "economy": 4000,
+        "standard": 9000,
+        "premium": 20000
+    },
+    "area_rug": {
+        "economy": 2500,
+        "standard": 7000,
+        "premium": 18000
+    },
+    "curtains_set": {
+        "economy": 2000,
+        "standard": 6000,
+        "premium": 14000
+    },
+    "ceiling_light": {
+        "economy": 1500,
+        "standard": 4500,
+        "premium": 12000
+    },
+    "flooring_sqft": {
+        "economy": 120,
+        "standard": 240,
+        "premium": 600
+    },
+    "commercial_door": {
+        "economy": 15000,
+        "standard": 35000,
+        "premium": 75000
+    },
+    "wall_paneling_sqft": {
+        "economy": 150,
+        "standard": 450,
+        "premium": 900
+    },
+    "acoustic_ceiling_sqft": {
+        "economy": 80,
+        "standard": 180,
+        "premium": 350
+    },
+    "projector_screen": {
+        "economy": 5000,
+        "standard": 15000,
+        "premium": 45000
+    },
+    "pa_speaker": {
+        "economy": 3000,
+        "standard": 12000,
+        "premium": 35000
+    },
+    "door_closer": {
+        "economy": 2500,
+        "standard": 5500,
+        "premium": 12000
+    },
+    "hardware_set": {
+        "economy": 1500,
+        "standard": 4500,
+        "premium": 10000
+    },
+    "sensor_device": {
+        "economy": 1500,
+        "standard": 4500,
+        "premium": 12000
+    }
+}
