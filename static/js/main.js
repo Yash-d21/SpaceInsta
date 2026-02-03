@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI Navigation elements
     const historySection = document.getElementById('historySection');
     const configSection = document.getElementById('configSection');
-    const historyGrid = document.getElementById('historyGrid');
+    const galleryCarousel = document.getElementById('galleryCarousel');
 
     // Analysis elements
     const fileInput = document.getElementById('fileInput');
@@ -141,26 +141,46 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(`history_${user}`, JSON.stringify(history));
     }
 
+    let currentGalleryIndex = 0;
+    let galleryItems = [];
+
     function loadHistory() {
         const history = JSON.parse(localStorage.getItem(`history_${user}`) || '[]');
-        historyGrid.innerHTML = '';
+        const prevBtn = document.getElementById('galleryPrev');
+        const nextBtn = document.getElementById('galleryNext');
+
+        if (!galleryCarousel) return;
+
+        galleryCarousel.innerHTML = '';
+        galleryItems = history;
+        currentGalleryIndex = 0;
 
         if (history.length === 0) {
-            historyGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: var(--text-muted); padding: 40px;">No design history yet. Start a new analysis!</p>';
+            galleryCarousel.innerHTML = `
+                <div class="gallery-empty">
+                    <i class="fa-solid fa-images"></i>
+                    <h3>No Design History Yet</h3>
+                    <p>Start a new analysis to see your designs here!</p>
+                </div>
+            `;
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
             return;
         }
 
-        history.forEach((item) => {
+        if (prevBtn) prevBtn.style.display = 'flex';
+        if (nextBtn) nextBtn.style.display = 'flex';
+
+        history.forEach((item, index) => {
             const card = document.createElement('div');
-            card.className = 'glass-card history-card';
+            card.className = 'gallery-item';
+            card.setAttribute('data-index', index);
             card.innerHTML = `
-                <img src="${item.spec.image_url}" class="history-item-img">
-                <div class="tag">${item.vision.room_type}</div>
-                <h3 style="margin-top: 15px;">${item.spec.title}</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">${item.date} • ${item.time}</p>
-                <div class="data-row" style="margin-top: 20px; border-top: 1px solid #f5f5f7; border-bottom: none;">
-                    <span class="data-label">Estimate</span>
-                    <span class="data-value" style="color: var(--primary);">₹${item.costs.premium.total.toLocaleString()}</span>
+                <img src="${item.spec.image_url}" alt="${item.spec.title}">
+                <div class="gallery-item-overlay">
+                    <div class="gallery-item-title">${item.spec.title}</div>
+                    <div class="gallery-item-meta">${item.vision.room_type} • ${item.spec.vibe}</div>
+                    <div class="gallery-item-date">${item.date} at ${item.time}</div>
                 </div>
             `;
             card.addEventListener('click', () => {
@@ -168,9 +188,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 historySection.style.display = 'none';
                 resultsContainer.style.display = 'block';
             });
-            historyGrid.appendChild(card);
+            galleryCarousel.appendChild(card);
+        });
+
+        updateGalleryPosition();
+    }
+
+    function updateGalleryPosition() {
+        if (!galleryCarousel) return;
+        const items = galleryCarousel.querySelectorAll('.gallery-item');
+        const total = items.length;
+
+        if (total === 0) return;
+
+        items.forEach((item, index) => {
+            const offset = index - currentGalleryIndex;
+            const absOffset = Math.abs(offset);
+
+            // Calculate position in 3D space
+            const angle = offset * 25; // degrees
+            const distance = 400 + (absOffset * 50); // pixels
+            const scale = Math.max(0.6, 1 - (absOffset * 0.15));
+            const opacity = Math.max(0.3, 1 - (absOffset * 0.3));
+            const zIndex = 100 - absOffset;
+
+            item.style.transform = `
+                translateX(${Math.sin(angle * Math.PI / 180) * distance}px)
+                translateZ(${-absOffset * 100}px)
+                rotateY(${-angle}deg)
+                scale(${scale})
+            `;
+            item.style.opacity = opacity;
+            item.style.zIndex = zIndex;
+            item.style.pointerEvents = absOffset > 1 ? 'none' : 'auto';
         });
     }
+
+    // Gallery navigation handlers
+    const setupGalleryNav = () => {
+        const prevBtn = document.getElementById('galleryPrev');
+        const nextBtn = document.getElementById('galleryNext');
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentGalleryIndex > 0) {
+                    currentGalleryIndex--;
+                    updateGalleryPosition();
+                }
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (currentGalleryIndex < galleryItems.length - 1) {
+                    currentGalleryIndex++;
+                    updateGalleryPosition();
+                }
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (historySection.style.display === 'none') return;
+
+            if (e.key === 'ArrowLeft' && currentGalleryIndex > 0) {
+                currentGalleryIndex--;
+                updateGalleryPosition();
+            } else if (e.key === 'ArrowRight' && currentGalleryIndex < galleryItems.length - 1) {
+                currentGalleryIndex++;
+                updateGalleryPosition();
+            }
+        });
+    };
+
+    setupGalleryNav();
 
     // --- Drag & Drop ---
     dropZone.addEventListener('click', () => fileInput.click());
