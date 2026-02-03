@@ -103,14 +103,21 @@ def analyze_image(image_path):
             generation_config=generation_config
         )
         
-        # Clean up response text if necessary (though json mode shd handle it)
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:-3].strip()
-            
-        return json.loads(text)
+        # Clean up response text if necessary
+        try:
+            text = response.text.strip()
+            if text.startswith("```json"):
+                text = text[7:-3].strip()
+            return json.loads(text)
+        except ValueError as ve:
+             # This happens if Gemini returns an error message instead of JSON (like 429)
+             print(f"Gemini API Error: {response.candidates[0].safety_ratings}")
+             return {"error": "API_LIMIT_REACHED", "message": "Gemini rate limit exceeded. Please wait 60s."}
 
     except Exception as e:
+        error_msg = str(e)
+        if "429" in error_msg:
+            return {"error": "RATE_LIMIT", "message": "Gemini Free Tier limit reached. Try again in 1 minute."}
         print(f"Error in Vision Agent (Gemini): {e}")
         return None
 
