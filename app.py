@@ -1,10 +1,10 @@
-
 import os
 import shutil
 import json
-from fastapi import FastAPI, UploadFile, File, HTTPException, Body
+from fastapi import FastAPI, UploadFile, File, HTTPException, Body, Header
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from typing import Optional
 
 # Load env variables AT THE TOP
 load_dotenv()
@@ -78,10 +78,14 @@ def estimate_get_info():
 
 @app.post("/api/v1/estimate")
 @app.post("/estimate", include_in_schema=False)
-async def estimate_design_cost(provider: str = "gemini", file: UploadFile = File(...)):
+async def estimate_design_cost(
+    provider: str = "gemini", 
+    file: UploadFile = File(...),
+    x_gemini_api_key: Optional[str] = Header(None)
+):
     """
-    Step 1 & 2: Upload an image to extract vision data and calculate cost estimates.
-    Returns the vision_analysis and cost_estimates structure.
+    Step 1 & 2: Upload an image to extract vision data and calculate costs.
+    If you are hitting rate limits, provide your own key in the 'X-Gemini-API-Key' header.
     """
     temp_file_path = os.path.join(TEMP_DIR, file.filename)
     
@@ -90,11 +94,12 @@ async def estimate_design_cost(provider: str = "gemini", file: UploadFile = File
             shutil.copyfileobj(file.file, buffer)
             
         vision_data = None
+        # Pass the custom key if provided
         if provider == "hf":
              from agent.vision_reader import analyze_image_hf
              vision_data = analyze_image_hf(temp_file_path)
         else:
-            vision_data = analyze_image(temp_file_path)
+            vision_data = analyze_image(temp_file_path, api_key_override=x_gemini_api_key)
         
         if not vision_data:
             raise HTTPException(status_code=400, detail="Vision extraction failed.")
@@ -124,12 +129,15 @@ def classify_get_info():
 
 @app.post("/api/v1/classify")
 @app.post("/classify", include_in_schema=False)
-async def classify_results(data: dict = Body(...)):
+async def classify_results(
+    data: dict = Body(...),
+    x_gemini_api_key: Optional[str] = Header(None)
+):
     """
     Step 3: Provide the vision_analysis JSON to get business classification levels.
     """
     vision_analysis = data.get("vision_analysis", data)
-    classification = classify_project(vision_analysis)
+    classification = classify_project(vision_analysis, api_key_override=x_gemini_api_key)
     return classification
 
 @app.get("/api/v1/full-analysis", include_in_schema=False)
@@ -138,16 +146,21 @@ def full_analysis_get_info():
     return {
         "error": "Method Not Allowed",
         "message": "This endpoint requires a POST request with an image file.",
-        "usage": "Use curl -F 'file=@your_image.jpg' http://localhost:8000/api/v1/full-analysis",
+        "usage": "Use curl -F 'file=@your_image.jpg' https://insta-space-seven.vercel.app/api/v1/full-analysis",
         "documentation": "/docs"
     }
 
 @app.post("/api/v1/full-analysis")
 @app.post("/full-analysis", include_in_schema=False)
-async def full_analysis(provider: str = "gemini", file: UploadFile = File(...)):
+async def full_analysis(
+    provider: str = "gemini", 
+    file: UploadFile = File(...),
+    x_gemini_api_key: Optional[str] = Header(None)
+):
     """
     Complete Flow: Image Upload -> Extraction -> Pricing -> Classification.
     Returns a unified response object.
+    Use 'X-Gemini-API-Key' header to bypass server rate limits.
     """
     temp_file_path = os.path.join(TEMP_DIR, file.filename)
     
@@ -155,7 +168,7 @@ async def full_analysis(provider: str = "gemini", file: UploadFile = File(...)):
         with open(temp_file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        vision_data = analyze_image(temp_file_path) if provider == "gemini" else None
+        vision_data = analyze_image(temp_file_path, api_key_override=x_gemini_api_key) if provider == "gemini" else None
         if provider == "hf":
             from agent.vision_reader import analyze_image_hf
             vision_data = analyze_image_hf(temp_file_path)
@@ -165,7 +178,7 @@ async def full_analysis(provider: str = "gemini", file: UploadFile = File(...)):
 
         catalog = load_catalog()
         estimates = calculate_estimate(vision_data, catalog)
-        classification = classify_project(vision_data)
+        classification = classify_project(vision_data, api_key_override=x_gemini_api_key)
 
         return {
             "vision_analysis": vision_data,

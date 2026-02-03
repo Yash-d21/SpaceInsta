@@ -6,9 +6,9 @@ import typing_extensions as typing
 # Initialize Model - will be deferred or checked in functions
 model = None
 
-def get_model():
+def get_model(api_key_override=None):
     global model
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = api_key_override or os.getenv("GOOGLE_API_KEY")
     
     # If not in env, try reloading .env just in case we are in a sub-process
     if not api_key:
@@ -17,11 +17,15 @@ def get_model():
         api_key = os.getenv("GOOGLE_API_KEY")
 
     if not api_key:
-        raise ValueError("GOOGLE_API_KEY is missing. Check your .env file or Vercel environment variables.")
+        raise ValueError("GOOGLE_API_KEY is missing. Use 'X-Gemini-API-Key' header to provide one.")
 
     # Re-configure ensures the key sticks in every request thread
     genai.configure(api_key=api_key)
     
+    # If a custom key is provided, we return a fresh model instance to ensure it uses that key
+    if api_key_override:
+        return genai.GenerativeModel("models/gemini-flash-latest")
+        
     if model is None:
         model = genai.GenerativeModel("models/gemini-flash-latest")
     
@@ -71,7 +75,7 @@ JSON schema:
 }
 """
 
-def analyze_image(image_path):
+def analyze_image(image_path, api_key_override=None):
     """
     Sends the image to Gemini Vision to extract structured data.
     """
@@ -94,7 +98,7 @@ def analyze_image(image_path):
             response_mime_type="application/json"
         )
 
-        response = get_model().generate_content(
+        response = get_model(api_key_override).generate_content(
             [
                 SYSTEM_PROMPT,
                 USER_PROMPT_TEMPLATE,

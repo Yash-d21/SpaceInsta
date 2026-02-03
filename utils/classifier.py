@@ -3,16 +3,17 @@ import os
 import json
 import google.generativeai as genai
 
-def classify_project(analysis_data):
+def classify_project(analysis_data, api_key_override=None):
     """
     Uses Gemini to classify the interior design project into business categories,
     risk tiers, and complexity levels.
     """
     try:
-        if not os.getenv("GOOGLE_API_KEY"):
+        api_key = api_key_override or os.getenv("GOOGLE_API_KEY")
+        if not api_key:
             return {"error": "API Key not found"}
 
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel("models/gemini-flash-latest")
 
         prompt = f"""
