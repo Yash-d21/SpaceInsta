@@ -49,13 +49,32 @@ def read_root():
     return {
         "status": "online", 
         "version": "1.1",
-        "message": "Interior Estimator API is running.",
-        "documentation": "/docs",
-        "v1_endpoints": {
-            "/health": "GET - API Health & Config Status",
-            "/api/v1/estimate": "POST - Image -> Analysis + Costing",
-            "/api/v1/classify": "POST - Analysis JSON -> Business Insights",
-            "/api/v1/full-analysis": "POST - Image -> All-in-one results"
+        "message": "Welcome to InstaSpace AI API!",
+        "interactive_docs": "/docs",
+        "how_to_use": {
+            "step_1_health": {
+                "url": "/api/v1/health",
+                "method": "GET",
+                "purpose": "Check if API and Keys are ready"
+            },
+            "step_2_analyze": {
+                "url": "/api/v1/estimate",
+                "method": "POST",
+                "body": "form-data (file=@image.jpg)",
+                "curl_example": "curl -X POST -F 'file=@room.jpg' https://insta-space-seven.vercel.app/api/v1/estimate"
+            },
+            "step_3_classify": {
+                "url": "/api/v1/classify",
+                "method": "POST",
+                "body": "JSON (vision_analysis)",
+                "curl_example": "curl -X POST -H 'Content-Type: application/json' -d '{\"vision_analysis\":{...}}' https://insta-space-seven.vercel.app/api/v1/classify"
+            },
+            "all_in_one": {
+                "url": "/api/v1/full-analysis",
+                "method": "POST",
+                "body": "form-data (file=@image.jpg)",
+                "curl_example": "curl -X POST -F 'file=@room.jpg' https://insta-space-seven.vercel.app/api/v1/full-analysis"
+            }
         }
     }
 
@@ -104,6 +123,16 @@ async def estimate_design_cost(provider: str = "gemini", file: UploadFile = File
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         if os.path.exists(temp_file_path): os.remove(temp_file_path)
+
+@app.get("/api/v1/classify")
+@app.get("/classify")
+def classify_get_info():
+    return {
+        "error": "Method Not Allowed",
+        "message": "This endpoint requires a POST request with JSON data.",
+        "usage": "Use curl -X POST -H 'Content-Type: application/json' -d '{\"vision_analysis\":{...}}' https://insta-space-seven.vercel.app/api/v1/classify",
+        "documentation": "/docs"
+    }
 
 @app.post("/api/v1/classify")
 @app.post("/classify")
