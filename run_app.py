@@ -4,59 +4,37 @@ import time
 import sys
 import os
 
-def run_backend():
-    print("🚀 Starting FastAPI Backend...")
+def run_flask():
+    print("🚀 Starting Flask App (Frontend + Backend)...")
+    # Using sys.executable to ensure we use the same python environment
     return subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"],
-        cwd=os.getcwd(),
-        shell=True
-    )
-
-def run_flutter():
-    print("📱 Starting Flutter Frontend (Chrome)...")
-    flutter_path = os.path.join(os.getcwd(), "flutter_app", "hackathon_2")
-    return subprocess.Popen(
-        ["flutter", "run", "-d", "chrome"],
-        cwd=flutter_path,
-        shell=True
+        [sys.executable, "flask_app.py"],
+        cwd=os.getcwd()
     )
 
 if __name__ == "__main__":
-    backend_proc = None
-    flutter_proc = None
+    flask_proc = None
     
     try:
-        # 1. Start Backend
-        backend_proc = run_backend()
+        # 1. Start Flask
+        flask_proc = run_flask()
         
-        # Give backend a moment to warm up
-        time.sleep(3)
-        
-        # 2. Start Flutter
-        flutter_proc = run_flutter()
-        
-        print("\n✅ Both services are launching!")
-        print("Backend: http://localhost:8000")
-        print("Frontend: launching in Chrome...")
-        print("\nPress Ctrl+C to stop both services.")
+        print("\n✅ InstaSpace AI is now running!")
+        print("URL: http://localhost:8000")
+        print("\nPress Ctrl+C to stop the service.")
         
         # Keep the script alive
         while True:
             time.sleep(1)
             
-            # Check if processes are still running
-            if backend_proc.poll() is not None:
-                print("❌ Backend stopped unexpectedly.")
-                break
-            if flutter_proc.poll() is not None:
-                print("❌ Flutter stopped unexpectedly.")
+            # Check if process is still running
+            if flask_proc.poll() is not None:
+                print("❌ Flask app stopped unexpectedly.")
                 break
                 
     except KeyboardInterrupt:
-        print("\n🛑 Stopping services...")
+        print("\n🛑 Stopping service...")
     finally:
-        if backend_proc:
-            backend_proc.terminate()
-        if flutter_proc:
-            flutter_proc.terminate()
+        if flask_proc:
+            flask_proc.terminate()
         print("👋 Done.")

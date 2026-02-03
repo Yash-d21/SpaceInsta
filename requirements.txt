@@ -6,3 +6,5 @@ uvicorn
 python-multipart
 huggingface_hub
 supabase
+flask
+flask-cors

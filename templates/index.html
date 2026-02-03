@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaSpace AI | Premium Interior Estimation</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Login Screen Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="glass-card login-card">
+            <div class="logo" style="text-align: center; margin-bottom: 30px;">InstaSpace AI</div>
+            <h2 style="text-align: center; margin-bottom: 30px;">Welcome Back</h2>
+            <form id="loginForm">
+                <div class="config-group" style="margin-bottom: 24px;">
+                    <label>Username</label>
+                    <input type="text" id="username" placeholder="Enter your name" required
+                        style="background: #f5f5f7; border: 1px solid transparent; border-radius: 12px; padding: 14px; color: #1d1d1f; width: 100%;">
+                </div>
+                <div class="config-group" style="margin-bottom: 32px;">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required
+                        style="background: #f5f5f7; border: 1px solid transparent; border-radius: 12px; padding: 14px; color: #1d1d1f; width: 100%;">
+                </div>
+                <button type="submit" class="btn-primary">Sign In to Dashboard</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: var(--text-muted);">Use any
+                credentials to enter demo mode.</p>
+        </div>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <p>Scanning Room with AI...</p>
+    </div>
+
+    <header>
+        <div class="logo">InstaSpace AI</div>
+        <nav class="nav-links" id="navLinks" style="display: none; gap: 20px; align-items: center;">
+            <button class="nav-btn" id="historyBtn"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
+            <button class="nav-btn" id="newAnalysisBtn"><i class="fa-solid fa-plus"></i> New</button>
+            <button class="nav-btn logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>
+                Logout</button>
+            <div class="user-badge">
+                <span class="status-dot"></span> <span id="displayUsername">User</span>
+            </div>
+        </nav>
+    </header>
+
+    <main id="mainDashboard" style="display: none;">
+        <!-- History Section -->
+        <section id="historySection" style="display: none; margin-bottom: 60px;">
+            <div class="hero">
+                <h1>Your Design Journey</h1>
+                <p>Browse your previous AI analyses and saved design specs.</p>
+            </div>
+            <div class="history-grid" id="historyGrid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+        <section class="hero">
+            <h1>Transform Your Space</h1>
+            <p>Upload a photo of any room to get instant vision analysis, detailed cost estimates, and business
+                classification.</p>
+        </section>
+
+        <section class="upload-section" id="configSection">
+            <div class="glass-card">
+                <form id="uploadForm">
+                    <!-- Step 1: Upload -->
+                    <div id="step1">
+                        <div class="upload-area" id="dropZone">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <h3>Drop your room photo here</h3>
+                            <p>Supports Jpg, Png, WebP</p>
+                            <input type="file" id="fileInput" name="file" accept="image/*" required>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Config -->
+                    <div id="step2" style="display:none; margin-top:30px;">
+                        <div class="config-grid">
+                            <div class="config-group">
+                                <label>02 — Aesthetic Preset</label>
+                                <select name="preset" id="presetSelect">
+                                    <option value="Modern">Modern</option>
+                                    <option value="Japandi">Japandi</option>
+                                    <option value="Minimal">Minimal</option>
+                                    <option value="Luxury">Luxury</option>
+                                    <option value="Industrial">Industrial</option>
+                                </select>
+                            </div>
+                            <div class="config-group">
+                                <label>03 — Target Budget</label>
+                                <label>03 — Target Budget: <span id="budgetDisplay"
+                                        style="color:var(--primary); font-weight:700;">₹10L</span></label>
+                                <input type="range" id="budgetInput" min="5" max="50" value="10" step="1"
+                                    style="width:100%; margin-top:10px;">
+                                <div
+                                    style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:5px;">
+                                    <span>₹5L</span>
+                                    <span>₹50L+</span>
+                                </div>
+                                <input type="hidden" id="budgetSelect" value="10L">
+                            </div>
+                            <div class="config-group">
+                                <label>04 — Project Zone</label>
+                                <select name="zone" id="zoneSelect">
+                                    <option value="Living">🛋️ Living</option>
+                                    <option value="Bedroom">🛏️ Bedroom</option>
+                                    <option value="Kitchen">🍳 Kitchen</option>
+                                    <option value="Bathroom">🚿 Bathroom</option>
+                                    <option value="Office">💼 Office</option>
+                                    <option value="Dining">🍽️ Dining</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" id="generateSpecsBtn" class="btn-primary">Generate Build Specs</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Placeholder for Preview -->
+        <div id="imagePreviewContainer"
+            style="display:none; max-width: 400px; margin: 30px auto; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); border: 2px solid var(--primary);">
+            <img id="imagePreview" src="" style="width:100%; display:block;">
+        </div>
+
+        <!-- Step 3: Spec Selection -->
+        <section id="specSelectionSection" style="display:none; margin-top: 80px;">
+            <div class="hero">
+                <h1>Choose Your Build Spec</h1>
+                <p>We've generated 3 custom directions based on your preferences. Select one to see detailed pricing.
+                </p>
+            </div>
+            <div class="specs-actions" style="display:flex; gap:20px; justify-content:center; margin: 40px 0;">
+                <button type="button" id="generateMoreBtn" class="nav-btn" style="padding: 12px 24px;">🔄 Generate
+                    More</button>
+            </div>
+            <div class="specs-grid" id="specsGrid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <section class="results-container" id="results" style="display: none;">
+            <div id="selectedSpecResult" style="margin-bottom: 60px; text-align: center;">
+                <div class="glass-card"
+                    style="padding: 40px; max-width: 900px; margin: 0 auto; border: none; background: #fff;">
+                    <span class="tag" style="background: var(--primary); color: #fff; margin-bottom: 20px;">Selected
+                        Design</span>
+                    <img id="finalDesignImage" src=""
+                        style="width:100%; border-radius: 20px; margin-top: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+                    <h2 id="finalDesignTitle" style="margin-top: 30px; font-size: 2.5rem; letter-spacing: -0.04em;">
+                    </h2>
+                    <p id="finalDesignVibe"
+                        style="color: var(--primary); font-weight: 700; font-size: 1.1rem; margin-top: 5px;"></p>
+                </div>
+            </div>
+            <div class="results-grid">
+
+                <!-- Vision Analysis Card -->
+                <div class="glass-card">
+                    <span class="tag">Vision Reader</span>
+                    <h2>Spatial Analysis</h2>
+                    <div id="visionData">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Cost Estimation Card -->
+                <div class="glass-card">
+                    <span class="tag">Cost Genius</span>
+                    <h2>Budget Forecast</h2>
+                    <div id="costData">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Business Classification Card -->
+                <div class="glass-card">
+                    <span class="tag">Business Intelligence</span>
+                    <h2>Project Strategy</h2>
+                    <div id="businessData">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>
