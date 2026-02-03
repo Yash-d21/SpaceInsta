@@ -4,14 +4,10 @@ import json
 import argparse
 from dotenv import load_dotenv
 
-# Load env before imports that might need it
+# Load env if .env exists, but don't crash if it doesn't (Vercel uses native env vars)
 load_dotenv()
 
-# Verify API Key
-if not os.getenv("GOOGLE_API_KEY"):
-    print("Error: GOOGLE_API_KEY not found in .env file.")
-    print("Please get a key from https://aistudio.google.com/ and add it to .env")
-    sys.exit(1)
+# We will check for the API key inside the actual functions instead of crashing at startup
 
 from agent.vision_reader import analyze_image
 from utils.pricing_utils import calculate_estimate

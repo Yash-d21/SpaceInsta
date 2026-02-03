@@ -1,5 +1,8 @@
 
-from app import app
+import sys
+import os
 
-# Vercel needs the app object to be named 'app' by default in the entry file
-# if using Python serverless functions.
+# Add the project root to the python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app import app
