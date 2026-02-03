@@ -34,7 +34,7 @@ TEMP_DIR = "/tmp" if os.getenv("VERCEL") else "temp"
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 # Health check endpoint
-@app.get("/health")
+@app.get("/health", include_in_schema=False)
 @app.get("/api/v1/health")
 def health_check():
     api_key_status = "configured" if os.getenv("GOOGLE_API_KEY") else "missing"
@@ -44,7 +44,7 @@ def health_check():
         "environment": "vercel" if os.getenv("VERCEL") else "local"
     }
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def read_root():
     return {
         "status": "online", 
@@ -58,18 +58,6 @@ def read_root():
                 "purpose": "Check if API and Keys are ready"
             },
             "step_2_analyze": {
-                "url": "/api/v1/estimate",
-                "method": "POST",
-                "body": "form-data (file=@image.jpg)",
-                "curl_example": "curl -X POST -F 'file=@room.jpg' https://insta-space-seven.vercel.app/api/v1/estimate"
-            },
-            "step_3_classify": {
-                "url": "/api/v1/classify",
-                "method": "POST",
-                "body": "JSON (vision_analysis)",
-                "curl_example": "curl -X POST -H 'Content-Type: application/json' -d '{\"vision_analysis\":{...}}' https://insta-space-seven.vercel.app/api/v1/classify"
-            },
-            "all_in_one": {
                 "url": "/api/v1/full-analysis",
                 "method": "POST",
                 "body": "form-data (file=@image.jpg)",
@@ -78,8 +66,8 @@ def read_root():
         }
     }
 
-@app.get("/api/v1/estimate")
-@app.get("/estimate")
+@app.get("/api/v1/estimate", include_in_schema=False)
+@app.get("/estimate", include_in_schema=False)
 def estimate_get_info():
     return {
         "error": "Method Not Allowed",
@@ -89,7 +77,7 @@ def estimate_get_info():
     }
 
 @app.post("/api/v1/estimate")
-@app.post("/estimate")
+@app.post("/estimate", include_in_schema=False)
 async def estimate_design_cost(provider: str = "gemini", file: UploadFile = File(...)):
     """
     Step 1 & 2: Upload an image to extract vision data and calculate cost estimates.
@@ -124,8 +112,8 @@ async def estimate_design_cost(provider: str = "gemini", file: UploadFile = File
     finally:
         if os.path.exists(temp_file_path): os.remove(temp_file_path)
 
-@app.get("/api/v1/classify")
-@app.get("/classify")
+@app.get("/api/v1/classify", include_in_schema=False)
+@app.get("/classify", include_in_schema=False)
 def classify_get_info():
     return {
         "error": "Method Not Allowed",
@@ -135,7 +123,7 @@ def classify_get_info():
     }
 
 @app.post("/api/v1/classify")
-@app.post("/classify")
+@app.post("/classify", include_in_schema=False)
 async def classify_results(data: dict = Body(...)):
     """
     Step 3: Provide the vision_analysis JSON to get business classification levels.
@@ -144,8 +132,8 @@ async def classify_results(data: dict = Body(...)):
     classification = classify_project(vision_analysis)
     return classification
 
-@app.get("/api/v1/full-analysis")
-@app.get("/full-analysis")
+@app.get("/api/v1/full-analysis", include_in_schema=False)
+@app.get("/full-analysis", include_in_schema=False)
 def full_analysis_get_info():
     return {
         "error": "Method Not Allowed",
@@ -155,7 +143,7 @@ def full_analysis_get_info():
     }
 
 @app.post("/api/v1/full-analysis")
-@app.post("/full-analysis")
+@app.post("/full-analysis", include_in_schema=False)
 async def full_analysis(provider: str = "gemini", file: UploadFile = File(...)):
     """
     Complete Flow: Image Upload -> Extraction -> Pricing -> Classification.
