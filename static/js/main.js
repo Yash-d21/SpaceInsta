@@ -3,13 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginOverlay = document.getElementById('loginOverlay');
     const loginForm = document.getElementById('loginForm');
     const mainDashboard = document.getElementById('mainDashboard');
-    const navLinks = document.getElementById('navLinks');
     const displayUsername = document.getElementById('displayUsername');
-    const logoutBtn = document.getElementById('logoutBtn');
 
     // UI Navigation elements
-    const historyBtn = document.getElementById('historyBtn');
-    const newAnalysisBtn = document.getElementById('newAnalysisBtn');
     const historySection = document.getElementById('historySection');
     const configSection = document.getElementById('configSection');
     const historyGrid = document.getElementById('historyGrid');
@@ -69,18 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('userBadgeHeader').style.display = 'flex'; // Show user badge in top right
 
         loadHistory();
-        loadHistory();
     }
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const username = document.getElementById('username').value;
         if (username) login(username);
-    });
-
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('is_user');
-        window.location.reload();
     });
 
     // --- Navigation Logic (Dock Actions) ---
