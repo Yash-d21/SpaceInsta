@@ -59,9 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
         user = username;
         localStorage.setItem('is_user', username);
         displayUsername.innerText = username;
+        // loginOverlay.style.display = 'none'; // Keep overlay hidden/visible handled by CSS if needed, but here we just hide it.
         loginOverlay.style.display = 'none';
         mainDashboard.style.display = 'block';
-        navLinks.style.display = 'flex';
+
+        // Render Dock
+        renderDock();
+        document.getElementById('dockContainer').style.display = 'block';
+        document.getElementById('userBadgeHeader').style.display = 'flex'; // Show user badge in top right
+
+        loadHistory();
         loadHistory();
     }
 
@@ -76,27 +83,62 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.reload();
     });
 
-    // --- Navigation Logic ---
-    historyBtn.addEventListener('click', () => {
-        configSection.style.display = 'none';
-        specSelectionSection.style.display = 'none';
-        resultsContainer.style.display = 'none';
-        imagePreviewContainer.style.display = 'none';
-        historySection.style.display = 'block';
-        loadHistory();
-    });
+    // --- Navigation Logic (Dock Actions) ---
+    function renderDock() {
+        const dockContainer = document.getElementById('dockContainer');
+        dockContainer.innerHTML = `
+            <div class="dock-outer">
+                <div class="dock-panel">
+                    <div class="dock-item" onclick="handleDockAction('home')">
+                        <div class="dock-icon"><i class="fa-solid fa-house"></i></div>
+                        <div class="dock-label">Home</div>
+                    </div>
+                    <div class="dock-item" onclick="handleDockAction('history')">
+                        <div class="dock-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                        <div class="dock-label">History</div>
+                    </div>
+                    <div class="dock-item" onclick="handleDockAction('new')">
+                        <div class="dock-icon"><i class="fa-solid fa-plus"></i></div>
+                        <div class="dock-label">New</div>
+                    </div>
+                    <div class="dock-item" onclick="handleDockAction('logout')">
+                        <div class="dock-icon"><i class="fa-solid fa-right-from-bracket" style="color: var(--error);"></i></div>
+                        <div class="dock-label">Logout</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
-    newAnalysisBtn.addEventListener('click', () => {
-        historySection.style.display = 'none';
-        specSelectionSection.style.display = 'none';
-        resultsContainer.style.display = 'none';
-        imagePreviewContainer.style.display = 'none';
-        configSection.style.display = 'block';
-        step1.style.display = 'block';
-        step2.style.display = 'none';
-        fileInput.value = '';
-        currentFile = null;
-    });
+    window.handleDockAction = (action) => {
+        if (action === 'home' || action === 'new') {
+            historySection.style.display = 'none';
+            specSelectionSection.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            imagePreviewContainer.style.display = 'none';
+            configSection.style.display = 'block';
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+            fileInput.value = '';
+            currentFile = null;
+        } else if (action === 'history') {
+            configSection.style.display = 'none';
+            specSelectionSection.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            imagePreviewContainer.style.display = 'none';
+            historySection.style.display = 'block';
+            loadHistory();
+        } else if (action === 'logout') {
+            localStorage.removeItem('is_user');
+            window.location.reload();
+        }
+    };
+
+    /* 
+    // Legacy Nav Listeners - Removed in favor of Dock
+    historyBtn.addEventListener('click', () => { ... });
+    newAnalysisBtn.addEventListener('click', () => { ... });
+    */
 
     // --- History Logic ---
     function saveToHistory(data) {

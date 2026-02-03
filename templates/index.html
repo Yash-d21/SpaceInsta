@@ -41,15 +41,16 @@
 
     <header>
         <div class="logo">InstaSpace AI</div>
-        <nav class="nav-links" id="navLinks" style="display: none; gap: 20px; align-items: center;">
-            <button class="nav-btn" id="historyBtn"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
-            <button class="nav-btn" id="newAnalysisBtn"><i class="fa-solid fa-plus"></i> New</button>
-            <button class="nav-btn logout-btn" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>
-                Logout</button>
-            <div class="user-badge">
-                <span class="status-dot"></span> <span id="displayUsername">User</span>
-            </div>
-        </nav>
+        <!-- Dock Navigation Container -->
+        <div id="dockContainer"
+            style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;">
+            <!-- Dock will be rendered here by JS -->
+        </div>
+
+        <!-- User Badge (Top Right) -->
+        <div id="userBadgeHeader" style="display: none; align-items: center; gap: 10px;">
+            <div class="user-badge"><span class="status-dot"></span> <span id="displayUsername">User</span></div>
+        </div>
     </header>
 
     <main id="mainDashboard" style="display: none;">
