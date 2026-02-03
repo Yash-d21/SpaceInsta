@@ -42,9 +42,11 @@ import base64
 def generate_image_via_gemini(prompt, index):
     """
     Generates an image using Google's native 'Nano Banana' (gemini-2.5-flash-image).
+    Falls back to Pollinations AI if Gemini fails.
     """
     try:
         print(f"🍌 NANO BANANA: Generating image for spec {index}...")
+        print(f"📝 Prompt: {prompt[:100]}...")
         
         # Configure model
         model = genai.GenerativeModel("models/gemini-2.5-flash-image")
@@ -61,6 +63,7 @@ def generate_image_via_gemini(prompt, index):
                     # If on Vercel, return base64 data URI directly to avoid disk write issues
                     if os.environ.get('VERCEL'):
                         b64_string = base64.b64encode(image_bytes).decode('utf-8')
+                        print(f"✅ SUCCESS: Generated base64 image for spec {index}")
                         return f"data:image/png;base64,{b64_string}"
                     
                     # Local env: Save to disk
@@ -71,11 +74,47 @@ def generate_image_via_gemini(prompt, index):
                     print(f"✅ SUCCESS: Saved Banana image as {filename}")
                     return f"/static/img/{filename}"
         
-        print(f"❌ FAILED: No image data returned from Nano Banana")
-        return None
+        print(f"❌ FAILED: No image data returned from Nano Banana, trying fallback...")
+        return generate_image_fallback(prompt, index)
+        
     except Exception as e:
-        print(f"❌ ERROR: Nano Banana generation: {e}")
-        # If it's a rate limit, we might want to wait, but for now just return None
+        print(f"❌ ERROR: Nano Banana generation failed: {e}")
+        print(f"🔄 Falling back to Pollinations AI...")
+        return generate_image_fallback(prompt, index)
+
+def generate_image_fallback(prompt, index):
+    """
+    Fallback image generation using Pollinations AI.
+    """
+    try:
+        # Clean prompt for URL
+        clean_prompt = urllib.parse.quote(prompt[:500])
+        pollinations_url = f"https://image.pollinations.ai/prompt/{clean_prompt}?width=800&height=600&nologo=true&seed={index}"
+        
+        print(f"🎨 POLLINATIONS: Generating fallback image {index}...")
+        
+        # Download the image
+        response = requests.get(pollinations_url, timeout=30)
+        if response.status_code == 200:
+            # If on Vercel, return base64
+            if os.environ.get('VERCEL'):
+                b64_string = base64.b64encode(response.content).decode('utf-8')
+                print(f"✅ SUCCESS: Generated fallback base64 image")
+                return f"data:image/png;base64,{b64_string}"
+            
+            # Local: save to disk
+            filename = f"fallback_{int(time.time())}_{index}.png"
+            filepath = os.path.join(IMG_OUTPUT_DIR, filename)
+            with open(filepath, "wb") as f:
+                f.write(response.content)
+            print(f"✅ SUCCESS: Saved fallback image as {filename}")
+            return f"/static/img/{filename}"
+        else:
+            print(f"❌ Pollinations failed with status {response.status_code}")
+            return None
+            
+    except Exception as e:
+        print(f"❌ ERROR: Fallback generation failed: {e}")
         return None
 
 def generate_specs_data(image_path, preset, budget, zone, api_key_override=None):
